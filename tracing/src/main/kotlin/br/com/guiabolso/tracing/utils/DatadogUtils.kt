@@ -1,7 +1,6 @@
 package br.com.guiabolso.tracing.utils
 
 import datadog.trace.api.DDSpanTypes.HTTP_SERVER
-import datadog.trace.api.DDSpanTypes.WEB_SERVLET
 import datadog.trace.api.DDTags.ERROR_MSG
 import datadog.trace.api.DDTags.ERROR_STACK
 import datadog.trace.api.DDTags.ERROR_TYPE
@@ -9,6 +8,7 @@ import datadog.trace.api.DDTags.SPAN_TYPE
 import io.opentracing.Span
 import io.opentracing.tag.Tags
 import io.opentracing.util.GlobalTracer
+import java.util.concurrent.Callable
 
 object DatadogUtils {
 
@@ -32,11 +32,23 @@ object DatadogUtils {
     }
 
     @JvmStatic
+    @JvmOverloads
+    fun traceAsNewOperation(
+        name: String,
+        type: String = HTTP_SERVER,
+        func: Callable<Void>
+    ) {
+        traceAsNewOperation(name, type) {
+            func.call()
+        }
+    }
+
+    @JvmStatic
     fun <T> traceBlock(name: String, func: () -> T): T {
         val tracer = GlobalTracer.get()!!
 
         val scope = tracer.buildSpan(name).startActive(true)!!
-        return scope.use { _ ->
+        return scope.use {
             try {
                 func()
             } catch (e: Exception) {

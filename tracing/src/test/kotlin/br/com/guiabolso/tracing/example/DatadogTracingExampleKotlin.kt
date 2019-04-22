@@ -20,7 +20,7 @@ fun main(vararg args: String) {
     val tracer = TracerFactory.createTracerWithDatadog()
     val executor = Executors.newFixedThreadPool(2)
 
-    //You don't need to use DatadogUtils.traceAsNewOperation when using servlet, its automatic.
+    // You don't need to use DatadogUtils.traceAsNewOperation when using servlet, it is automatic.
     DatadogUtils.traceAsNewOperation("simpleOperation") {
         tracer.addProperty("oneTag", "someValue1")
         someWork()
